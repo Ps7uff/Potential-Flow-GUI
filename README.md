@@ -3,7 +3,6 @@ One of the greatest difficulties in visualizing potential flow is the quick plot
 
 
   Features include:
-  
     Initial prompt to choose a template, either blank or pre-made example.
     
     Streamplot created using the summed velocity field with adjustable variables: stream density, line weight, arrows/size, color, and frame limits.
