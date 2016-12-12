@@ -38,5 +38,5 @@ For a description of components and their velocities and stream functions, refer
 http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f15.pdf
 http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f16.pdf
 
-Questions? Email alecwmitchell@gmail.com
+Questions and feedback? Email alecwmitchell@gmail.com
     
