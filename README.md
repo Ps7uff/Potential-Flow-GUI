@@ -27,8 +27,8 @@ One of the greatest difficulties in visualizing potential flow is the quick plot
     Dimensions of Tkinter windows and objects were optimized and tested using resolutions 2560x1440 
     and 1280x800.  Other resolutions have not been tested and may occlude certain items.
     
-    The script can run in the most up-to-date native Anaconda environment, other environments may require 
-    that modules be imported.  As such, a standalone app or executable was not able to be created using 
+    The script can run in the most up-to-date native Anaconda environment, other environments may 
+    require that modules be imported.  As such, a standalone app or executable was not able to be created using 
     either py2app or pyinstaller due to incompatibility with conda pathing.
     
     Branch cuts in the dividing streamline (as per earlier).
