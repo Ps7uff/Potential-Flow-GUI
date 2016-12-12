@@ -3,24 +3,33 @@ One of the greatest difficulties in visualizing potential flow is the quick plot
 
 
   Features include:
+  
     Initial prompt to choose a template, either blank or pre-made example.
     
-    Streamplot created using the summed velocity field with adjustable variables: stream density, line weight, arrows/size, color, and frame limits.
+    Streamplot created using the summed velocity field with adjustable variables: stream density, 
+    line weight, arrows/size, color, and frame limits.
     
-    Dividing streamline created using the zero contour of the stream function.  Note that the source/sink stream function uses atan2(-Y,-X) and thus plots an undesirable horizontal branch cut.  The alternative is to have certain dividing streams missing in particular cases.
+    Dividing streamline created using the zero contour of the stream function.  Note that the 
+    source/sink stream function uses atan2(-Y,-X) and thus plots an undesirable horizontal branch cut.  
+    The alternative is to have certain dividing streams missing in particular cases.
     
-    Selection mode creates a marker on the plot for highlighted elements.  Be advised this requires that the graph be refreshed each time there is a new selection, creating delays while editing.
+    Selection mode creates a marker on the plot for highlighted elements.  Be advised this requires 
+    that the graph be refreshed each time there is a new selection, creating delays while editing.
     
-    Add/remove elements with modifiable position and strengths. Note the coordinates of a uniform crosswind determines its direction.
+    Add/remove elements with modifiable position and strengths. Note the coordinates of a uniform 
+    crosswind determines its direction.
     
     Navigation toolbar has options for plot: reset, pan, zoom to rectangle, and save.
  
  
   Possible/known issues:
   
-    Dimensions of Tkinter windows and objects were optimized and tested using resolutions 2560x1440 and 1280x800.  Other resolutions have not been tested and may occlude certain items.
+    Dimensions of Tkinter windows and objects were optimized and tested using resolutions 2560x1440 
+    and 1280x800.  Other resolutions have not been tested and may occlude certain items.
     
-    The script can run in the most up-to-date native Anaconda environment, other environments may require that modules be imported.  As such, a standalone app or executable was not able to be created using either py2app or pyinstaller due to incompatibility with conda pathing.
+    The script can run in the most up-to-date native Anaconda environment, other environments may require 
+    that modules be imported.  As such, a standalone app or executable was not able to be created using 
+    either py2app or pyinstaller due to incompatibility with conda pathing.
     
     Branch cuts in the dividing streamline (as per earlier).
     
