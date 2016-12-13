@@ -1,9 +1,8 @@
-
 from Tkinter import *
 import matplotlib
 from matplotlib.figure import Figure
 matplotlib.use("TkAgg")
-from numpy import pi, mgrid, arctan2, log
+from numpy import pi, mgrid, arctan2, log, sin, arctan, cos
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from tkColorChooser import askcolor
 from ttk import Treeview
@@ -22,7 +21,7 @@ class App:
         self.default_color = self.master.cget("bg")
         self.first_flag = 1
         self.active_edit_flag = 0
-        self.graph_types = ['Default','Maelstrom','Rankine Half-Body','Rankine Oval', 'Doublet+Uniform']
+        self.graph_types = ['Default','Maelstrom','Rankine Half-Body','Rankine Oval', 'Cylinder','Stagnation & Vortex']
        #-----------------------------------------------------------------------
         self.file_menu = Menu(self.menubar)
         
@@ -67,8 +66,8 @@ class App:
         self.div_check_var.set(50)
         self.div_val = 50
         self.density_var = IntVar()
-        self.density_var.set(25)
-        self.density_val = 25
+        self.density_var.set(35)
+        self.density_val = 35
         self.arrow_var = IntVar()
         self.arrow_var.set(25)
         self.arrow_val = 25
@@ -78,7 +77,7 @@ class App:
         self.mark_var.set(0)
         self.lock_var = IntVar()
         self.lock_var.set(1)
-        self.active_numbers = {'s':0,'v':0,'u':0,'d':0}
+        self.active_numbers = {'s':0,'v':0,'u':0,'d':0,'n':0}
         self.sel_point = None
         self.selected = None
     def changegraph(self,event):
@@ -108,11 +107,14 @@ class App:
             self.U = self.source(X+2,Y,10)[0]+self.source(X-2,Y,-10)[0]+self.uniform(X,Y,1,1,0)[0]
             self.V = self.source(X+2,Y,10)[1]+self.source(X-2,Y,-10)[1]+self.uniform(X,Y,1,1,0)[1]
             self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
-        elif self.listbox.get(self.listbox.curselection()) == 'Doublet+Uniform':
+        elif self.listbox.get(self.listbox.curselection()) == 'Cylinder':
             self.U = self.doublet(X,Y,25)[0]+self.uniform(X,Y,1,1,0)[0]
             self.V = self.doublet(X,Y,25)[1]+self.uniform(X,Y,1,1,0)[1]
             self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
-
+        elif self.listbox.get(self.listbox.curselection()) == 'Stagnation & Vortex':
+            self.U = self.vortex(X,Y,25)[0]+self.corner(X,Y,'2,1')[0]
+            self.V = self.vortex(X,Y,25)[1]+self.corner(X,Y,'2,1')[1]
+            self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
         self.FigSubPlot.set_xlim(self.xlim)
         self.FigSubPlot.set_ylim(self.ylim)
         
@@ -145,6 +147,24 @@ class App:
         U = (k/(2*pi))*((2*Y*Y/((X*X+Y*Y)*(X*X+Y*Y)))-(1/(X*X+Y*Y)))
         V = -(k/(2*pi))*(2*X*Y/((X*X+Y*Y)*(X*X+Y*Y)))
         return (U,V)
+    def corner(self,X,Y,tup):
+        comma_flag = 0
+        A = ''
+        n = ''
+        for char in tup:
+            if char == ',':
+                comma_flag = 1
+            elif comma_flag == 0:
+                n += char
+            elif comma_flag == 1:
+                A += char
+        A = float(A)
+        n = float(n)
+        R = (X*X+Y*Y)**0.5
+        t = arctan2(-Y,-X)
+        U = -A*n*R**(n-1)*(cos(n*t)*cos(t)+sin(n*t)*sin(t))
+        V = -A*n*R**(n-1)*(cos(n*t)*sin(t)-sin(n*t)*cos(t))
+        return (U,V)
     def stream_source(self,X,Y,l):
         l = float(l)
         stream = (l/(2*pi))*arctan2(-Y,-X)
@@ -162,6 +182,21 @@ class App:
     def stream_doublet(self,X,Y,k):
         k = float(k)
         stream = -(k/(2*pi))*Y/(X*X+Y*Y)
+        return stream
+    def stream_corner(self,X,Y,tup):
+        comma_flag = 0
+        A = ''
+        n = ''
+        for char in tup:
+            if char == ',':
+                comma_flag = 1
+            elif comma_flag == 0:
+                n += char
+            elif comma_flag == 1:
+                A += char
+        A = float(A)
+        n = float(n)
+        stream = A*(X*X+Y*Y)**(n*0.5)*sin(n*arctan2(-Y,-X))
         return stream
     def quit(self):
         self.master.destroy()    
@@ -201,10 +236,10 @@ class App:
         self.elements.heading("values",text="Str")
         self.elements.heading("xlocations",text="X")
         self.elements.heading("ylocations",text="Y")
-        self.elements.column("#0",width=90)
-        self.elements.column("values",width=35)
-        self.elements.column("xlocations",width=26)
-        self.elements.column("ylocations",width=26)
+        self.elements.column("#0",width=90,anchor=CENTER)
+        self.elements.column("values",width=45,anchor=CENTER)
+        self.elements.column("xlocations",width=26,anchor=CENTER)
+        self.elements.column("ylocations",width=26,anchor=CENTER)
         self.elements.pack(fill=BOTH,expand=1)
         
         self.as_button_frame = Frame(self.elements_frame)
@@ -220,6 +255,7 @@ class App:
         self.addsub_menu.add_command(command=self.add_vortex,label='Vortex')
         self.addsub_menu.add_command(command=self.add_uniform,label='Uniform')
         self.addsub_menu.add_command(command=self.add_doublet,label='Doublet')
+        self.addsub_menu.add_command(command=self.add_corner,label='Corner')
         
 
         if self.listbox.get(self.listbox.curselection()) == 'Default':
@@ -255,8 +291,8 @@ class App:
                                  'u%s'%self.active_numbers['u']:("u",self.elements.item('u%s'%self.active_numbers['u'],"values"))}
             self.active_numbers['s'] += 2
             self.active_numbers['u'] += 1       
-        elif self.listbox.get(self.listbox.curselection()) == 'Doublet+Uniform':
-            self.elements.insert("",0,'D+U',text="Doub+Uni",open=TRUE)
+        elif self.listbox.get(self.listbox.curselection()) == 'Cylinder':
+            self.elements.insert("",0,'D+U',text="Cylinder",open=TRUE)
             self.active_components = ['D+U']
             self.elements.insert('D+U',0,iid='d%s'%self.active_numbers['d'],text="Doublet",values=("%s"%25,0,0))
             self.elements.insert('D+U',0,iid='u%s'%self.active_numbers['u'],text="Uniform",values=("%s"%1,1,0))
@@ -264,6 +300,15 @@ class App:
                                  'u%s'%self.active_numbers['u']:("u",self.elements.item('u%s'%self.active_numbers['u'],"values"))}
             self.active_numbers['d'] += 1
             self.active_numbers['u'] += 1
+        elif self.listbox.get(self.listbox.curselection()) == 'Stagnation & Vortex':
+            self.elements.insert("",0,'S+V',text="Stag+Vort",open=TRUE)
+            self.active_components = ['S+V']
+            self.elements.insert('S+V',0,iid='n%s'%self.active_numbers['n'],text="C (n,A)",values=("%s,%s"%(2,1),0,0))
+            self.elements.insert('S+V',0,iid='v%s'%self.active_numbers['v'],text="Vortex",values=("%s"%25,0,0))
+            self.active_calls = {'n%s'%self.active_numbers['n']:("n",self.elements.item('n%s'%self.active_numbers['n'],"values")),
+                                 'v%s'%self.active_numbers['v']:("v",self.elements.item('v%s'%self.active_numbers['v'],"values"))}
+            self.active_numbers['n'] += 1
+            self.active_numbers['v'] += 1
         self.elements.bind("<Double-Button-1>",self.edit)
         self.elements.bind('<<TreeviewSelect>>',self.treeview_select)
         self.main.bind("<Return>",self.edit_return)
@@ -283,10 +328,10 @@ class App:
                 else:
                     pass
         else:
-             if self.mark_var.get() == 0 or self.selected == self.elements.selection():
-                 pass
-             elif self.mark_var.get() == 1:
-                 if self.elements.selection() != '':
+            if self.mark_var.get() == 0 or self.selected == self.elements.selection():
+                pass
+            elif self.mark_var.get() == 1:
+                if self.elements.selection() != '':
                     child = self.elements.selection()[0]
                     if child != '':
                         self.sel_point = None
@@ -303,9 +348,11 @@ class App:
             self.graph_update()
             
     def add(self):
-        self.addsub_menu.post(self.main.winfo_x()+self.as_button_frame.winfo_x()+self.add_button.winfo_x(),self.main.winfo_y()+self.as_button_frame.winfo_y()+self.add_button.winfo_y()-50)
+        self.addsub_menu.post(self.main.winfo_x()+self.as_button_frame.winfo_x()+self.add_button.winfo_x(),self.main.winfo_y()+self.as_button_frame.winfo_y()+self.add_button.winfo_y()-len(self.active_numbers.keys())*14)
     def subtract(self):
         child = self.elements.focus()
+        if child == '':
+            return
         if self.elements.parent(child) == '':
             ID = child
             self.active_components.remove(child)
@@ -462,6 +509,12 @@ class App:
         self.active_components.append('d%s'%self.active_numbers['d'])
         self.graph_update()
         self.active_numbers['d'] += 1
+    def add_corner(self):
+        self.elements.insert("",0,iid='n%s'%self.active_numbers['n'],text="Corner (n,A)",values=("%s,%s"%(2,1),0,0))
+        self.active_calls['n%s'%self.active_numbers['n']] = ("n",self.elements.item('n%s'%self.active_numbers['n'],"values"))
+        self.active_components.append('n%s'%self.active_numbers['n'])
+        self.graph_update()
+        self.active_numbers['n'] += 1
     def pan_update(self,event):
         if [self.FigSubPlot.get_xlim()[0],self.FigSubPlot.get_xlim()[1]] != self.xlim or [self.FigSubPlot.get_ylim()[0],self.FigSubPlot.get_ylim()[1]] != self.ylim or self.density_var.get() != self.density_val or self.line_var.get() != self.line_val or self.arrow_var.get() != self.arrow_val or self.arrow_var.get() != self.arrow_val or self.div_check_var.get() != self.div_val:
             self.graph_update()
@@ -502,6 +555,10 @@ class App:
                     self.U += self.doublet(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[0]
                     self.V += self.doublet(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[1]
                     self.stream += self.stream_doublet(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])
+                elif self.active_calls[child][0] == 'n':
+                    self.U += self.corner(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[0]
+                    self.V += self.corner(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[1]
+                    self.stream += self.stream_corner(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])
             else:
                 for child in self.elements.get_children(ID):
                     self.active_calls[child] = (child[0],self.elements.item(child,"values"))
@@ -524,7 +581,10 @@ class App:
                         self.U += self.doublet(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[0]
                         self.V += self.doublet(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[1]
                         self.stream += self.stream_doublet(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])
-        
+                    elif self.active_calls[child][0] == 'n':
+                        self.U += self.corner(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[0]
+                        self.V += self.corner(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])[1]
+                        self.stream += self.stream_corner(X-float(self.active_calls[child][1][1]),Y-float(self.active_calls[child][1][2]),self.active_calls[child][1][0])
 
         self.FigSubPlot.streamplot(X,Y,self.U,self.V,color=self.line_color.get(), linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle=self.linet_var.get(),arrowsize=(4.0/71.0)*self.arrow_var.get()+(13.0/71.0))
         if self.div_var.get() == 1:
@@ -543,9 +603,9 @@ class App:
             if norm == 0:
                 norm = 1
             X,Y,U,V = 0,0, float(self.sel_point[0])/norm,float(self.sel_point[1])/norm
-            self.FigSubPlot.quiver(X,Y,U,V,angles='xy',scale_units='xy',scale=1,color='r')
+            self.FigSubPlot.quiver(X,Y,U,V,angles='xy',scale_units='xy',scale=1,color='g')
         else:
-            self.FigSubPlot.plot([self.sel_point[0]],[self.sel_point[1]],'r^',ms=10)
+            self.FigSubPlot.plot([self.sel_point[0]],[self.sel_point[1]],'g*',ms=10)
     def edit(self,event):
         if self.active_edit_flag == 1 or self.elements.identify_row(event.y) == '':
             pass
@@ -570,13 +630,57 @@ class App:
     def del_edit(self,event):
         if self.column[-1] == '0':
             self.elements.item(self.rowid,text='%s'%self.edit_var.get())
+        elif self.rowid[0] == 'n' and self.column[-1] == '1' and ',' not in self.edit_var.get():
+            pass
         else:
             value = ''
-            for char in self.edit_var.get():
+            initial_value = str(self.elements.item(self.rowid)['values'][int(self.column[-1])-1])
+            comma_flag = 0
+            div_flag = 0
+            for index in range(0,len(self.edit_var.get())):
+                char = self.edit_var.get()[index]
                 if char in '-0123456789.':
                     value += char
-            if value == '':
-                value = 0
+                elif self.rowid[0] == 'n' and char == ',':
+                    if comma_flag == 1:
+                        self.edit_entry.destroy()
+                        self.active_edit_flag = 0
+                        return
+                    value += char
+                    comma_flag = 1
+                    comma_index = index
+                if char == '/':
+                    if div_flag == 0:
+                        div_flag = 1
+                        div_index = index
+                    elif div_flag == 1 and comma_flag == 1:
+                        div_flag = 2
+                        div_index2 = index
+                    elif div_flag == 1 and comma_flag == 0 or div_flag == 2:
+                        self.edit_entry.destroy()
+                        self.active_edit_flag = 0
+                        return
+                   
+            if div_flag == 1:
+                if comma_flag == 1:
+                    if div_index < comma_index:
+                        arg = int(float(value[:div_index])*100/float(value[div_index:comma_index-1]))/100.0
+                        value = str(arg)+value[comma_index-1:]
+                    elif div_index > comma_index:
+                        arg = int(float(value[comma_index+1:div_index])*100/float(value[div_index:]))/100.0
+                        value = value[:comma_index+1]+str(arg)
+                else:
+                    arg = int(float(value[:div_index])*100/float(value[div_index:]))/100.0
+                    value = str(arg)
+            elif div_flag == 2: 
+                arg1 = int(float(value[:div_index])*100/float(value[div_index:comma_index-1]))/100.0
+                arg2 = int(float(value[comma_index:div_index2-1])*100/float(value[div_index2-1:]))/100.0
+                value = str(arg1)+','+str(arg2)
+            if value == '' or value == initial_value:
+                self.edit_entry.destroy()
+                self.active_edit_flag = 0
+                return
+            
             self.elements.set(self.rowid,column=(int(self.column[-1])-1),value=value)
             if self.mark_var.get() == 1:
                 self.sel_point = [self.elements.item(self.rowid,"values")[1],self.elements.item(self.rowid,"values")[2]]
