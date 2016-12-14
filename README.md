@@ -36,6 +36,7 @@ One of the greatest difficulties in visualizing potential flow is the quick plot
 For a description of components and their velocities and stream functions, reference:
 http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f15.pdf
 http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f16.pdf
+
 For corner flow reference:
 http://web.stanford.edu/~cantwell/AA200_Course_Material/AA200_Course_Notes/AA200_Ch_10_Elements_of_potential_flow_Cantwell.pdf
 http://web.mit.edu/fluids-modules/www/potential_flows/LecturesHTML/lec1011/node36.html
