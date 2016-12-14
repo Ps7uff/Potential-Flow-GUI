@@ -360,6 +360,8 @@ class App:
     def add(self):
         self.addsub_menu.post(self.main.winfo_x()+self.as_button_frame.winfo_x()+self.add_button.winfo_x(),self.main.winfo_y()+self.as_button_frame.winfo_y()+self.add_button.winfo_y()-len(self.active_numbers.keys())*14)
     def subtract(self):
+        if self.active_edit_flag == 1:
+            self.del_edit(self)
         child = self.elements.focus()
         if child == '':
             return
