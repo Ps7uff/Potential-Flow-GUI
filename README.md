@@ -29,17 +29,17 @@ One of the greatest difficulties in visualizing potential flow is the quick plot
     require that modules be imported.  As such, a standalone app or executable was not able to be 
     created using either py2app or pyinstaller due to incompatibility with conda pathing.
     
-    The source/sink stream function for the dividing streamline uses atan2(-Y,-X) and thus plots an undesirable horizontal 
-    branch cut. The alternative is to have certain dividing streams missing in particular setups.
+    The source/sink stream function for the dividing streamline uses atan2(-Y,-X) and thus plots 
+    an undesirable horizontal branch cut. The alternative is to have certain dividing streams 
+    missing in particular setups.
     
     
 For a description of components and their velocities and stream functions, reference:
-http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f15.pdf
+http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f15.pdf,
 http://web.mit.edu/16.unified/www/FALL/fluids/Lectures/f16.pdf
 
 For corner flow reference:
-http://web.stanford.edu/~cantwell/AA200_Course_Material/AA200_Course_Notes/AA200_Ch_10_Elements_of_potential_flow_Cantwell.pdf
-http://web.mit.edu/fluids-modules/www/potential_flows/LecturesHTML/lec1011/node36.html
+http://web.stanford.edu/~cantwell/AA200_Course_Material/AA200_Course_Notes/AA200_Ch_10_Elements_of_potential_flow_Cantwell.pdf,   http://web.mit.edu/fluids-modules/www/potential_flows/LecturesHTML/lec1011/node36.html
 
 
 Questions and feedback? Email alecwmitchell@gmail.com
