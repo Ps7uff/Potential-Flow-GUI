@@ -1,3 +1,4 @@
+
 from Tkinter import *
 import matplotlib
 from matplotlib.figure import Figure
@@ -19,26 +20,39 @@ class App:
         self.menubar = Menu(self.master)
         self.master.config(menu=self.menubar)
         self.default_color = self.master.cget("bg")
-        self.first_flag = 1
         self.active_edit_flag = 0
         self.graph_types = ['Default','Maelstrom','Rankine Half-Body','Rankine Oval', 'Cylinder','Stagnation & Vortex']
        #-----------------------------------------------------------------------
         self.file_menu = Menu(self.menubar)
         
+        self.Fig = matplotlib.figure.Figure(figsize=(2.148,1.777),dpi=100,tight_layout=True)
+        self.FigSubPlot = self.Fig.add_subplot(111)     
         frame = Frame(master,bg='#%02x%02x%02x' % (231, 231, 231))
         frame.pack(fill=BOTH, expand=1)
         frame2 = Frame(frame,bg='#%02x%02x%02x' % (221, 221, 221))
         frame2.pack(fill=BOTH, expand=1,padx=20,pady=23)
         self.frame3 = Frame(frame2, bg='#%02x%02x%02x' % (221, 221, 221))
         self.frame3.pack(fill=BOTH, padx=17,pady=17,expand=1)
-        self.listbox = Listbox(self.frame3)
-        for key_num in range(0,len(self.graph_types)):
-            self.listbox.insert(END,self.graph_types[key_num])
-        self.listbox.select_set(0)
-        self.listbox.bind('<<ListboxSelect>>',self.changegraph)
+        self.radio_frame = Frame(self.frame3,bg='#%02x%02x%02x' % (221, 221, 221))
+      
+        #self.listbox = Listbox(self.frame3)
+        self.radio_var = StringVar()
+        self.radio_var.set('Default')
+        for key in self.graph_types:
+            b = Radiobutton(self.radio_frame,text=key,variable=self.radio_var,value = key,bg='#%02x%02x%02x' % (221, 221, 221))
+            b.pack(anchor=W)
+#        for key_num in range(0,len(self.graph_types)):
+#            self.listbox.insert(END,self.graph_types[key_num])
+#        self.listbox.select_set(0)
+#        self.listbox.bind('<<ListboxSelect>>',self.changegraph)
+        self.radio_var.trace('w',self.changegraph)
+#        self.old = self.listbox.get(self.listbox.curselection())
         self.blankc = Canvas(self.frame3,width=225,height=188)
-        self.changegraph(1)
-        self.listbox.pack(side=LEFT,anchor=W,padx=8,pady=5,fill=BOTH,expand=1)
+        self.canvas = FigureCanvasTkAgg(self.Fig, master=self.frame3)
+        self.canvas.show()
+        self.canvas.get_tk_widget().pack(side=RIGHT,padx=0,pady=5)
+        self.radio_frame.pack(side=LEFT,anchor=W,padx=8,pady=5,fill=BOTH,expand=1) 
+        #self.listbox.pack(side=LEFT,anchor=W,padx=8,pady=5,fill=BOTH,expand=1)   
         self.button_frame = Frame(frame,bg='#%02x%02x%02x' % (231, 231, 231))
         self.button_frame.pack(side=RIGHT)
         self.buffer_frame = Frame(self.button_frame,bg='#%02x%02x%02x' % (231, 231, 231))
@@ -50,7 +64,6 @@ class App:
         self.button_c.focus()
         self.button_c.pack(side=RIGHT)
         self.button_x.pack(side=RIGHT,padx=14)
-        
         self.line_color = StringVar()
         self.line_color.set('#000000')
         self.wt_var = StringVar()
@@ -69,7 +82,7 @@ class App:
         self.density_var.set(35)
         self.density_val = 35
         self.arrow_var = IntVar()
-        self.arrow_var.set(25)
+        self.arrow_var.set(25) 
         self.arrow_val = 25
         self.div_var = IntVar()
         self.div_var.set(0)
@@ -80,51 +93,46 @@ class App:
         self.active_numbers = {'s':0,'v':0,'u':0,'d':0,'n':0}
         self.sel_point = None
         self.selected = None
-    def changegraph(self,event):
+    def changegraph(self,*args):
         self.xlim = [-5.0,5.0]
         self.ylim = [-5.0,5.0]
         Y, X = mgrid[-5:5:100j, -5:5:100j]
         self.X,self.Y = X,Y
-        if self.first_flag == 1:
-            self.Fig = matplotlib.figure.Figure(figsize=(2.148,1.777),dpi=100,tight_layout=True)
-            self.FigSubPlot = self.Fig.add_subplot(111)
-        else:
-            self.FigSubPlot.clear()
-        
-        if self.listbox.get(self.listbox.curselection()) == 'Default':
+        self.FigSubPlot.clear()
+        #if self.listbox.get(self.listbox.curselection()) == 'Default':
+        if self.radio_var.get() == 'Default':
             self.U = 0*X
             self.V = 0*X
             self.FigSubPlot.streamplot(X,Y,self.U,self.V)
-        elif self.listbox.get(self.listbox.curselection()) == 'Maelstrom':    
+        #elif self.listbox.get(self.listbox.curselection()) == 'Maelstrom':
+        elif self.radio_var.get() == 'Maelstrom':    
             self.U = self.source(X,Y,1)[0]+self.vortex(X,Y,1)[0]
             self.V = self.source(X,Y,1)[1]+self.vortex(X,Y,1)[1]
             self.FigSubPlot.streamplot(X,Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
-        elif self.listbox.get(self.listbox.curselection()) == 'Rankine Half-Body':
+        #elif self.listbox.get(self.listbox.curselection()) == 'Rankine Half-Body':
+        elif self.radio_var.get() == 'Rankine Half-Body':
             self.U = self.source(X,Y,10)[0]+self.uniform(X,Y,1,1,0)[0]
             self.V = self.source(X,Y,10)[1]+self.uniform(X,Y,1,1,0)[1]
             self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
-        elif self.listbox.get(self.listbox.curselection()) == 'Rankine Oval':
+        #elif self.listbox.get(self.listbox.curselection()) == 'Rankine Oval':
+        elif self.radio_var.get() == 'Rankine Oval':
             self.U = self.source(X+2,Y,10)[0]+self.source(X-2,Y,-10)[0]+self.uniform(X,Y,1,1,0)[0]
             self.V = self.source(X+2,Y,10)[1]+self.source(X-2,Y,-10)[1]+self.uniform(X,Y,1,1,0)[1]
             self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
-        elif self.listbox.get(self.listbox.curselection()) == 'Cylinder':
+        #elif self.listbox.get(self.listbox.curselection()) == 'Cylinder':
+        elif self.radio_var.get() == 'Cylinder':
             self.U = self.doublet(X,Y,25)[0]+self.uniform(X,Y,1,1,0)[0]
             self.V = self.doublet(X,Y,25)[1]+self.uniform(X,Y,1,1,0)[1]
             self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
-        elif self.listbox.get(self.listbox.curselection()) == 'Stagnation & Vortex':
+        #elif self.listbox.get(self.listbox.curselection()) == 'Stagnation & Vortex':
+        elif self.radio_var.get() == 'Stagnation & Vortex':
             self.U = self.vortex(X,Y,25)[0]+self.corner(X,Y,'2,1')[0]
             self.V = self.vortex(X,Y,25)[1]+self.corner(X,Y,'2,1')[1]
             self.FigSubPlot.streamplot(X, Y,self.U,self.V, color='k', linewidth=(2.0/71.0)*self.line_var.get()+(13.0/71.0),density=(2.0/71.0)*self.density_var.get()+(13.0/71.0),arrowstyle='-')
         self.FigSubPlot.set_xlim(self.xlim)
         self.FigSubPlot.set_ylim(self.ylim)
-        
-        if self.first_flag == 1:
-            self.canvas = FigureCanvasTkAgg(self.Fig, master=self.frame3)
-            self.canvas.show()
-            self.canvas.get_tk_widget().pack(side=RIGHT,padx=0,pady=5)
-            self.first_flag = 0
-        else:
-            self.canvas.draw()
+        self.canvas.draw()
+#        self.old = self.listbox.get(self.listbox.curselection())
     def source(self,X,Y,l):
         l = float(l)
         U = (l/(2*pi))*X/(X*X + Y*Y)
@@ -258,11 +266,13 @@ class App:
         self.addsub_menu.add_command(command=self.add_corner,label='Corner')
         
 
-        if self.listbox.get(self.listbox.curselection()) == 'Default':
+        #if self.listbox.get(self.listbox.curselection()) == 'Default':
+        if self.radio_var.get() == 'Default':
             self.active_components = []
             self.active_calls = {} 
             pass
-        elif self.listbox.get(self.listbox.curselection()) == 'Maelstrom':
+        #elif self.listbox.get(self.listbox.curselection()) == 'Maelstrom':
+        elif self.radio_var.get() == 'Maelstrom':
             self.elements.insert("",0,"M",text="Maelstrom",open=TRUE)
             self.active_components = ['M']
             self.elements.insert("M",0,iid='s%s'%self.active_numbers['s'],text="Source",values=("%s"%1,0,0))
@@ -271,7 +281,7 @@ class App:
                                  'v%s'%self.active_numbers['v']:("v",self.elements.item('v%s'%self.active_numbers['v'],"values"))}
             self.active_numbers['s'] += 1
             self.active_numbers['v'] += 1
-        elif self.listbox.get(self.listbox.curselection()) == 'Rankine Half-Body':
+        elif self.radio_var.get() == 'Rankine Half-Body':
             self.elements.insert("",0,"RHF",text="Rankine Half-Body",open=TRUE)
             self.active_components = ['RHF']
             self.elements.insert("RHF",0,iid='s%s'%self.active_numbers['s'],text="Source",values=("%s"%10,0,0))
@@ -280,7 +290,7 @@ class App:
                                  'u%s'%self.active_numbers['u']:("u",self.elements.item('u%s'%self.active_numbers['u'],"values"))}
             self.active_numbers['s'] += 1
             self.active_numbers['u'] += 1
-        elif self.listbox.get(self.listbox.curselection()) == 'Rankine Oval':
+        elif self.radio_var.get() == 'Rankine Oval':
             self.elements.insert("",0,"RO",text="Rankine Oval",open=TRUE)
             self.active_components = ['RO']
             self.elements.insert("RO",0,iid='s%s'%self.active_numbers['s'],text="Source",values=("%s"%10,-2,0))
@@ -291,7 +301,7 @@ class App:
                                  'u%s'%self.active_numbers['u']:("u",self.elements.item('u%s'%self.active_numbers['u'],"values"))}
             self.active_numbers['s'] += 2
             self.active_numbers['u'] += 1       
-        elif self.listbox.get(self.listbox.curselection()) == 'Cylinder':
+        elif self.radio_var.get() == 'Cylinder':
             self.elements.insert("",0,'D+U',text="Cylinder",open=TRUE)
             self.active_components = ['D+U']
             self.elements.insert('D+U',0,iid='d%s'%self.active_numbers['d'],text="Doublet",values=("%s"%25,0,0))
@@ -300,7 +310,7 @@ class App:
                                  'u%s'%self.active_numbers['u']:("u",self.elements.item('u%s'%self.active_numbers['u'],"values"))}
             self.active_numbers['d'] += 1
             self.active_numbers['u'] += 1
-        elif self.listbox.get(self.listbox.curselection()) == 'Stagnation & Vortex':
+        elif self.radio_var.get() == 'Stagnation & Vortex':
             self.elements.insert("",0,'S+V',text="Stag+Vort",open=TRUE)
             self.active_components = ['S+V']
             self.elements.insert('S+V',0,iid='n%s'%self.active_numbers['n'],text="C (n,A)",values=("%s,%s"%(2,1),0,0))
