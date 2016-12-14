@@ -34,8 +34,8 @@ class App:
         self.listbox = Listbox(self.frame3)
         for key_num in range(0,len(self.graph_types)):
             self.listbox.insert(END,self.graph_types[key_num])
-        self.listbox.bind('<<ListboxSelect>>',self.changegraph)
         self.listbox.select_set(0)
+        self.listbox.bind('<<ListboxSelect>>',self.changegraph)
         self.blankc = Canvas(self.frame3,width=225,height=188)
         self.changegraph(1)
         self.listbox.pack(side=LEFT,anchor=W,padx=8,pady=5,fill=BOTH,expand=1)
