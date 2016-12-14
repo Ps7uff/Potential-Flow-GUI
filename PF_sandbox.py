@@ -615,7 +615,7 @@ class App:
             X,Y,U,V = 0,0, float(self.sel_point[0])/norm,float(self.sel_point[1])/norm
             self.FigSubPlot.quiver(X,Y,U,V,angles='xy',scale_units='xy',scale=1,color='g')
         else:
-            self.FigSubPlot.plot([self.sel_point[0]],[self.sel_point[1]],'g*',ms=10)
+            self.FigSubPlot.plot([self.sel_point[0]],[self.sel_point[1]],'r^',ms=10)
     def edit(self,event):
         if self.active_edit_flag == 1 or self.elements.identify_row(event.y) == '':
             pass
